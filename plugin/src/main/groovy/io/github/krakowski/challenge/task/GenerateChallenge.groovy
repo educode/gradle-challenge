@@ -33,7 +33,7 @@ class GenerateChallenge extends DefaultTask {
             throw new IllegalStateException("Invalid project name provided")
         }
 
-        def id = idSplit.first()
+        def id = idSplit[1];
         def metaPath = Paths.get("${project.projectDir}/${META_FILENAME}")
         if (Files.notExists(metaPath)) {
             throw new IllegalStateException("Metadata file is missing within project")
