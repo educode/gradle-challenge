@@ -1,6 +1,7 @@
 package io.github.krakowski.challenge.task
 
 import groovy.json.JsonSlurper
+import groovy.swing.SwingBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
@@ -15,15 +16,33 @@ class PublishChallenge extends DefaultTask {
 
     @TaskAction
     def action() {
-        def log = project.logger
 
-        log.lifecycle("Pleas provide your educode username: ")
-        def user = System.in.newReader().readLine()
+        def username = ''
+        def password = ''
+        new SwingBuilder().edt {
+            dialog(modal: true,
+                    title: 'Enter password',
+                    alwaysOnTop: true,
+                    resizable: false,
+                    locationRelativeTo: null,
+                    pack: true,
+                    show: true
+            ) {
+                vbox { // Put everything below each other
+                    label(text: "username:")
+                    usernameInput = textField()
+                    label(text: "password:")
+                    passwordInput = passwordField()
+                    button(defaultButton: true, text: 'OK', actionPerformed: {
+                        username = usernameInput.text
+                        password = passwordInput.password
+                        dispose()
+                    })
+                }
+            }
+        }
 
-        log.lifecycle("Please provide your educode password: ")
-        def password = System.in.newReader().readLine()
-
-        def token = login(user, password)
+        def token = login(username, password)
         publish(token)
     }
 
@@ -52,7 +71,6 @@ class PublishChallenge extends DefaultTask {
         post.setRequestProperty("Authorization", "Bearer ${token}")
         post.getOutputStream().write(challenge.getBytes("UTF-8"));
         def postRC = post.getResponseCode();
-        project.logger.lifecycle(String.valueOf(postRC))
         if(postRC.equals(200)) {
             return
         } else if (postRC.equals(409)) {
@@ -60,6 +78,7 @@ class PublishChallenge extends DefaultTask {
         } else if (postRC.equals(403)) {
             throw new RuntimeException("Permission denied")
         } else {
+            project.logger.error("HTTP ERROR {}", postRC)
             throw new RuntimeException("Publishing failed")
         }
     }

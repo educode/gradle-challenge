@@ -31,14 +31,14 @@ gradlePlugin {
 }
 
 pluginBundle {
-    website = 'https://github.com/krakowski/challenge'
-    vcsUrl = 'https://github.com/krakowski/challenge.git'
-    description = 'Uploads challenges to the CodeCamp platform'
-    tags = ['codecamp', 'challenge', 'upload']
+    website = 'https://github.com/hhu-educode/gradle-challenge'
+    vcsUrl = 'https://github.com/hhu-educode/gradle-challenge.git'
+    description = 'Uploads challenges to the educode platform'
+    tags = ['educode', 'challenge', 'upload']
 
     plugins {
         challengePlugin {
-            displayName = 'CodeCamp Challenge Management Plugin'
+            displayName = 'educode challenge management plugin'
         }
     }
 }
