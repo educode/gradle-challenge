@@ -1,0 +1,44 @@
+plugins {
+    id "com.gradle.plugin-publish" version "0.10.1"
+    id "java-gradle-plugin"
+    id 'groovy'
+}
+
+group = 'io.github.krakowski'
+version = '0.1.0'
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+
+    implementation project(':api')
+    implementation 'com.github.javaparser:javaparser-core:3.14.10'
+    implementation 'org.yaml:snakeyaml:1.24'
+}
+
+gradlePlugin {
+    plugins {
+        challengePlugin {
+            id = 'io.github.krakowski.challenge'
+            implementationClass = 'io.github.krakowski.challenge.ChallengePlugin'
+        }
+    }
+}
+
+pluginBundle {
+    website = 'https://github.com/krakowski/challenge'
+    vcsUrl = 'https://github.com/krakowski/challenge.git'
+    description = 'Uploads challenges to the CodeCamp platform'
+    tags = ['codecamp', 'challenge', 'upload']
+
+    plugins {
+        challengePlugin {
+            displayName = 'CodeCamp Challenge Management Plugin'
+        }
+    }
+}
