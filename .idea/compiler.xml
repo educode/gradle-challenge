@@ -6,6 +6,8 @@
       <module name="gradle-challenge-plugin.api.test" target="11" />
       <module name="gradle-challenge-plugin.plugin.main" target="11" />
       <module name="gradle-challenge-plugin.plugin.test" target="11" />
+      <module name="gradle-challenge.main" target="11" />
+      <module name="gradle-challenge.test" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>

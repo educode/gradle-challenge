@@ -1,1 +1,1 @@
-include ':plugin', ':api'
+rootProject.name = 'gradle-challenge'
