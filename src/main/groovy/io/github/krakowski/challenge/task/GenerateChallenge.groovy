@@ -69,7 +69,9 @@ class GenerateChallenge extends DefaultTask {
                 title: metaData.title,
                 description: description,
                 thumbnail: metaData.thumbnailUrl,
-                deadline: metaData.deadline,
+                startTime: metaData.startTime,
+                endTime: metaData.endTime,
+                plagCheck: metaData.plagCheck,
                 skeleton: [
                         className: metaData.implementationClass,
                         content: implementation.toString(config)
@@ -104,7 +106,9 @@ class GenerateChallenge extends DefaultTask {
         public String implementationClass
         public String testClass
         public String thumbnailUrl
-        public String deadline
+        public String startTime
+        public String endTime
+        public Boolean plagCheck
     }
 
     private static class SourceProcessor extends VoidVisitorAdapter<Void> {
