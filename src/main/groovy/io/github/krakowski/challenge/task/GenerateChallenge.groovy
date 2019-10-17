@@ -72,6 +72,7 @@ class GenerateChallenge extends DefaultTask {
                 startTime: metaData.startTime,
                 endTime: metaData.endTime,
                 plagCheck: metaData.plagCheck,
+                locked: metaData.locked,
                 skeleton: [
                         className: metaData.implementationClass,
                         content: implementation.toString(config)
@@ -109,6 +110,7 @@ class GenerateChallenge extends DefaultTask {
         public String startTime
         public String endTime
         public Boolean plagCheck
+        public Boolean locked
     }
 
     private static class SourceProcessor extends VoidVisitorAdapter<Void> {
