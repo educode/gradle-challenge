@@ -1,5 +1,7 @@
 package io.github.krakowski.challenge.task
 
+import com.github.javaparser.JavaParser
+import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.Node
@@ -7,7 +9,9 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.stmt.BlockStmt
 import com.github.javaparser.ast.visitor.VoidVisitor
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
+import com.github.javaparser.printer.PrettyPrinter
 import com.github.javaparser.printer.PrettyPrinterConfiguration
+import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter
 import groovy.json.JsonOutput
 import io.github.krakowski.challenge.Points
 import io.github.krakowski.challenge.Remove
@@ -16,6 +20,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.yaml.snakeyaml.Yaml
 
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -50,6 +55,11 @@ class GenerateChallenge extends DefaultTask {
         def implementationPath = "${project.projectDir}/src/main/java/${metaData.implementationClass.replace(".", "/").concat(".java")}"
         def testPath = "${project.projectDir}/src/test/java/${metaData.testClass.replace(".", "/").concat(".java")}"
 
+        def parserConfig = new ParserConfiguration()
+        parserConfig.characterEncoding = StandardCharsets.UTF_8
+        parserConfig.languageLevel = ParserConfiguration.LanguageLevel.JAVA_11
+        StaticJavaParser.setConfiguration(parserConfig)
+
         def implementationProcessor = new SourceProcessor()
         def implementation = parseSource(Paths.get(implementationPath), implementationProcessor)
         implementationProcessor.postProcess()
@@ -57,12 +67,6 @@ class GenerateChallenge extends DefaultTask {
         def testProcessor = new SourceProcessor()
         def test = parseSource(Paths.get(testPath), testProcessor)
         testProcessor.postProcess()
-
-        def config = new PrettyPrinterConfiguration();
-        config.columnAlignFirstMethodChain = true;
-        config.orderImports = true;
-        config.indentType = PrettyPrinterConfiguration.IndentType.SPACES;
-        config.indentSize = 2;
 
         def challenge = [
                 id: id,
@@ -75,11 +79,11 @@ class GenerateChallenge extends DefaultTask {
                 locked: metaData.locked,
                 skeleton: [
                         className: metaData.implementationClass,
-                        content: implementation.toString(config)
+                        content: LexicalPreservingPrinter.print(implementation)
                 ],
                 test: [
                         className: metaData.testClass,
-                        content: test.toString(config)
+                        content: LexicalPreservingPrinter.print(test)
                 ],
                 rewards: testProcessor.rewards
         ]
@@ -92,6 +96,7 @@ class GenerateChallenge extends DefaultTask {
 
     private static def parseSource(Path path, VoidVisitor<Void>... visitors) {
         def compilationUnit = StaticJavaParser.parse(path)
+        compilationUnit = LexicalPreservingPrinter.setup(compilationUnit)
         visitors.each { compilationUnit.accept(it, null) }
         return compilationUnit
     }
