@@ -77,6 +77,7 @@ class GenerateChallenge extends DefaultTask {
                 endTime: metaData.endTime,
                 plagCheck: metaData.plagCheck,
                 locked: metaData.locked,
+                unlockDeadline: metaData.unlockDeadline,
                 skeleton: [
                         className: metaData.implementationClass,
                         content: LexicalPreservingPrinter.print(implementation)
@@ -116,6 +117,7 @@ class GenerateChallenge extends DefaultTask {
         public String endTime
         public Boolean plagCheck
         public Boolean locked
+        public String unlockDeadline;
     }
 
     private static class SourceProcessor extends VoidVisitorAdapter<Void> {
