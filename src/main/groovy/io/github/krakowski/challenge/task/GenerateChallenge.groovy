@@ -1,6 +1,6 @@
 package io.github.krakowski.challenge.task
 
-import com.github.javaparser.JavaParser
+
 import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.ImportDeclaration
@@ -9,11 +9,8 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.stmt.BlockStmt
 import com.github.javaparser.ast.visitor.VoidVisitor
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
-import com.github.javaparser.printer.PrettyPrinter
-import com.github.javaparser.printer.PrettyPrinterConfiguration
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter
 import groovy.json.JsonOutput
-import io.github.krakowski.challenge.Points
 import io.github.krakowski.challenge.Difficulty
 import io.github.krakowski.challenge.Remove
 import io.github.krakowski.challenge.RemoveBody
@@ -103,10 +100,8 @@ class GenerateChallenge extends DefaultTask {
         return compilationUnit
     }
 
-    private static def isPluginAnnotation(String name) {
-        return name == RemoveBody.class.getName() ||
-               name == Remove.class.getName()     ||
-               name == Difficulty.class.getName()
+    private static def isPluginClass(String name) {
+        return name.startsWith('io.github.krakowski.challenge')
     }
 
     private static class MetaData {
@@ -130,16 +125,9 @@ class GenerateChallenge extends DefaultTask {
         void visit(MethodDeclaration node, Void arg) {
             if (node.isAnnotationPresent(Difficulty)) {
                 def annotation = node.getAnnotationByClass(Difficulty).get().asSingleMemberAnnotationExpr()
-                def value = annotation.getMemberValue().asFieldAccessExpr().name;
+                def value = annotation.getMemberValue().asNameExpr().name
                 def level = Difficulty.Level.valueOf(value.toString())
                 rewards.add(new Reward(node.getNameAsString(), level.points))
-                toRemove.add(annotation)
-            }
-
-            if (node.isAnnotationPresent(Points)) {
-                def annotation = node.getAnnotationByClass(Points).get().asSingleMemberAnnotationExpr()
-                def value = annotation.getMemberValue().asIntegerLiteralExpr().asInt()
-                rewards.add(new Reward(node.getNameAsString(), value))
                 toRemove.add(annotation)
             }
 
@@ -158,7 +146,7 @@ class GenerateChallenge extends DefaultTask {
 
         @Override
         void visit(ImportDeclaration node, Void arg) {
-            if (isPluginAnnotation(node.getNameAsString())) {
+            if (isPluginClass(node.getNameAsString())) {
                 toRemove.add(node)
             }
 
