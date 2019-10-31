@@ -14,6 +14,7 @@ import com.github.javaparser.printer.PrettyPrinterConfiguration
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter
 import groovy.json.JsonOutput
 import io.github.krakowski.challenge.Points
+import io.github.krakowski.challenge.Difficulty
 import io.github.krakowski.challenge.Remove
 import io.github.krakowski.challenge.RemoveBody
 import org.gradle.api.DefaultTask
@@ -105,7 +106,7 @@ class GenerateChallenge extends DefaultTask {
     private static def isPluginAnnotation(String name) {
         return name == RemoveBody.class.getName() ||
                name == Remove.class.getName()     ||
-               name == Points.class.getName()
+               name == Difficulty.class.getName()
     }
 
     private static class MetaData {
@@ -127,21 +128,29 @@ class GenerateChallenge extends DefaultTask {
 
         @Override
         void visit(MethodDeclaration node, Void arg) {
-            if (node.isAnnotationPresent(Points.class)) {
-                def annotation = node.getAnnotationByClass(Points.class).get().asSingleMemberAnnotationExpr()
+            if (node.isAnnotationPresent(Difficulty)) {
+                def annotation = node.getAnnotationByClass(Difficulty).get().asSingleMemberAnnotationExpr()
+                def value = annotation.getMemberValue().asFieldAccessExpr().name;
+                def level = Difficulty.Level.valueOf(value.toString())
+                rewards.add(new Reward(node.getNameAsString(), level.points))
+                toRemove.add(annotation)
+            }
+
+            if (node.isAnnotationPresent(Points)) {
+                def annotation = node.getAnnotationByClass(Points).get().asSingleMemberAnnotationExpr()
                 def value = annotation.getMemberValue().asIntegerLiteralExpr().asInt()
                 rewards.add(new Reward(node.getNameAsString(), value))
                 toRemove.add(annotation)
             }
 
-            if (node.isAnnotationPresent(RemoveBody.class)) {
+            if (node.isAnnotationPresent(RemoveBody)) {
                 node.setBody(new BlockStmt())
-                toRemove.add(node.getAnnotationByClass(RemoveBody.class).get())
+                toRemove.add(node.getAnnotationByClass(RemoveBody).get())
             }
 
-            if (node.isAnnotationPresent(Remove.class)) {
+            if (node.isAnnotationPresent(Remove)) {
                 toRemove.add(node)
-                toRemove.add(node.getAnnotationByClass(Remove.class).get())
+                toRemove.add(node.getAnnotationByClass(Remove).get())
             }
 
             super.visit(node, arg)
