@@ -5,8 +5,16 @@ import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.Node
+import com.github.javaparser.ast.body.AnnotationDeclaration
+import com.github.javaparser.ast.body.AnnotationMemberDeclaration
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
+import com.github.javaparser.ast.body.ConstructorDeclaration
+import com.github.javaparser.ast.body.EnumDeclaration
+import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.expr.ClassExpr
 import com.github.javaparser.ast.stmt.BlockStmt
+import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt
 import com.github.javaparser.ast.visitor.VoidVisitor
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter
@@ -145,7 +153,76 @@ class GenerateChallenge extends DefaultTask {
         }
 
         @Override
+        void visit(ClassOrInterfaceDeclaration node, Void arg) {
+            if (node.isAnnotationPresent(Remove)) {
+                toRemove.add(node)
+                toRemove.add(node.getAnnotationByClass(Remove).get())
+            }
+
+            super.visit(node, arg)
+        }
+
+        @Override
+        void visit(FieldDeclaration node, Void arg) {
+            if (node.isAnnotationPresent(Remove)) {
+                toRemove.add(node)
+                toRemove.add(node.getAnnotationByClass(Remove).get())
+            }
+
+            super.visit(node, arg)
+        }
+
+        @Override
+        void visit(ConstructorDeclaration node, Void arg) {
+            if (node.isAnnotationPresent(Remove)) {
+                toRemove.add(node)
+                toRemove.add(node.getAnnotationByClass(Remove).get())
+            }
+
+            super.visit(node, arg)
+        }
+
+        @Override
+        void visit(EnumDeclaration node, Void arg) {
+            if (node.isAnnotationPresent(Remove)) {
+                toRemove.add(node)
+                toRemove.add(node.getAnnotationByClass(Remove).get())
+            }
+
+            super.visit(node, arg)
+        }
+
+        @Override
+        void visit(AnnotationDeclaration node, Void arg) {
+            if (node.isAnnotationPresent(Remove)) {
+                toRemove.add(node)
+                toRemove.add(node.getAnnotationByClass(Remove).get())
+            }
+
+            super.visit(node, arg)
+        }
+
+        @Override
+        void visit(AnnotationMemberDeclaration node, Void arg) {
+            if (node.isAnnotationPresent(Remove)) {
+                toRemove.add(node)
+                toRemove.add(node.getAnnotationByClass(Remove).get())
+            }
+
+            super.visit(node, arg)
+        }
+
+        @Override
         void visit(ImportDeclaration node, Void arg) {
+
+            // Annotations are not allowed on import statements, so we
+            // use a comment containing 'remove' as a workaround
+            node.comment.ifPresent {
+                if (it.content.toLowerCase(Locale.ROOT).contains('remove')) {
+                    toRemove.add(node)
+                }
+            }
+
             if (isPluginClass(node.getNameAsString())) {
                 toRemove.add(node)
             }
