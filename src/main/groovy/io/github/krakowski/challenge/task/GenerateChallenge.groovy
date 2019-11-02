@@ -86,11 +86,11 @@ class GenerateChallenge extends DefaultTask {
                 unlockDeadline: metaData.unlockDeadline,
                 skeleton: [
                         className: metaData.implementationClass,
-                        content: LexicalPreservingPrinter.print(implementation)
+                        content: LexicalPreservingPrinter.print(implementation).strip()
                 ],
                 test: [
                         className: metaData.testClass,
-                        content: LexicalPreservingPrinter.print(test)
+                        content: LexicalPreservingPrinter.print(test).strip()
                 ],
                 rewards: testProcessor.rewards
         ]
@@ -220,6 +220,7 @@ class GenerateChallenge extends DefaultTask {
             node.comment.ifPresent {
                 if (it.content.toLowerCase(Locale.ROOT).contains('remove')) {
                     toRemove.add(node)
+                    toRemove.add(it)
                 }
             }
 
